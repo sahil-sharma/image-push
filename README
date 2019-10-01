@@ -1,0 +1,41 @@
+#Notes
+#Author: Sahil Sharma
+#Date: 01 Oct 2019
+
+#OS: Ubuntu:18.04 (Debian based)
+#Python: 2.7
+#Docker: 1.18-CE
+#AWS Bucket: s3://demobucket/content
+
+#Install docker
+wget -qO- https://get.docker.com/ | sh
+
+#Using Cloudformation (Assuming AWS credentials are configured properly)
+echo -e "Run below command to create a single EC2 instance (t2.micro) using cloudformation template"
+echo -e "aws cloudformation create-stack --template-body file://ec2-instance.json --stack-name ec2-instance --parameters ParameterKey=KeyName,ParameterValue=ec2-instance ParameterKey=InstanceType,ParameterValue=t2.micro"
+
+#Running Standalone
+#Assuming you are at the location where all the code resides. Else switch to respective directory where there is code.
+
+Step 1: Run set-up.sh
+$ bash set-up.sh
+Above script will set-up everything (awscli, pip, virtualenv, install python dependencies) for you and start the application in the background for you and prints sample examples for you.
+
+###################################################
+
+#Running in docker container
+#WARNING: Data in container won't persist. Once the container is DELETED data won't be there.
+
+Step 1: Build docker image
+$ docker build -t task-image:v1 .
+
+Step 2: Run docker container from the images built above
+$ docker run -d --name task -p 5000:5000 -e AWS_ACCESS_KEY_ID=<YOUR-ACCESS-KEY> -e AWS_SECRET_ACCESS_KEY=<YOUR-SECRET-KEY> task-image:v1
+
+Step 3: Verify the working of download and push to S3 API (/download)
+$ curl http://localhost:5000/download\?url\=https://www.hdwallpapers.in/download/battlefield_4_soldier_5k-1280x720.jpg
+$ curl http://localhost:5000/download\?url\=https://www.hdwallpapers.in/download/maleficent_mistress_of_evil_angelina_jolie_2019_4k-480x800.jpg 
+$ curl http://localhost:5000/download\?https://apod.nasa.gov/apod/image/1701/potw1636aN159_HST_2048.jpg
+
+Step 4: Verify the working of list images from S3 API (/list)
+$ curl http://localhost:5000/list

@@ -1,0 +1,4 @@
+requests
+pysqlite3
+flask
+boto3
